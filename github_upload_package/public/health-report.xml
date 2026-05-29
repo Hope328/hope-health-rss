@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='utf-8'?>
+<rss version="2.0">
+  <channel>
+    <title>Hope 减脂健康报告</title>
+    <link>https://example.com/health-report.xml</link>
+    <description>Hope 的小米手环 / Apple Health 减脂健康报告</description>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 29 May 2026 14:07:15 +1000</lastBuildDate>
+    <item>
+      <title>【Hope 减脂日报｜2026-05-28】</title>
+      <link>https://example.com/health-report.xml#health-daily-2026-05-28</link>
+      <guid isPermaLink="false">health-daily-2026-05-28</guid>
+      <pubDate>Fri, 29 May 2026 14:07:15 +1000</pubDate>
+      <description>【Hope 减脂日报｜2026-05-28】
+
+一、今日结论
+今天活动量对减脂目标是加分的。活动能量约 405 kcal，减脂有效性评分 10/10，状态：推进中。
+
+二、核心数据
+- 步数：8336 步（减脂友好）
+- 距离：5.17 km（按步数估算）
+- 活动能量：405 kcal（直觉参考：约 5.1 个小苹果的能量）
+- 睡眠：8.42 小时（卧床估算）
+
+三、对目标的影响
+今天步数已经达到减脂友好区间，属于真正推进目标的一天。 睡眠也比较配合，有利于把活动成果留住。 距离字段和步数不匹配，已用步数估算，避免把残缺距离当真。
+
+四、明日行动
+- 明日最低：6000 步；理想：9000 步。
+- 运动：不必额外惩罚训练，正常活动加 15 分钟拉伸即可。
+- 饮食：每餐保留蛋白质，主食别乱砍，少一份零食比补偿式节食更稳。
+- 睡眠/恢复：睡前 30 分钟减少屏幕，尽量保证 7 小时左右。
+- 不要做：不要补偿式节食，也不要用高强度惩罚自己。
+
+五、一句话提醒
+今天的数据只用来帮你调整明天，不用来审判你；把最低步数和睡眠守住，节奏就接得上。
+数据提醒：心率未同步到 Apple Health，今天不分析心率。 距离按步数估算。</description>
+    </item>
+  </channel>
+</rss>
