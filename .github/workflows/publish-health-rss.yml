@@ -2,6 +2,15 @@ name: Publish health RSS
 
 on:
   workflow_dispatch:
+    inputs:
+      report_type:
+        description: Report to publish
+        required: true
+        default: daily
+        type: choice
+        options:
+          - daily
+          - weekly
   schedule:
     - cron: '30 14 * * *' # 00:30 Australia/Brisbane
     - cron: '0 23 * * 6' # Sunday 09:00 Australia/Brisbane
@@ -35,10 +44,15 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements.txt
       - name: Publish daily RSS item
-        if: github.event.schedule != '0 23 * * 6'
+        if: >-
+          (github.event_name == 'workflow_dispatch' && inputs.report_type == 'daily') ||
+          (github.event_name == 'push') ||
+          (github.event_name == 'schedule' && github.event.schedule != '0 23 * * 6')
         run: python main.py --rss-only
       - name: Publish weekly RSS item
-        if: github.event.schedule == '0 23 * * 6'
+        if: >-
+          (github.event_name == 'workflow_dispatch' && inputs.report_type == 'weekly') ||
+          (github.event_name == 'schedule' && github.event.schedule == '0 23 * * 6')
         run: python main.py --weekly --rss-only
       - name: Check RSS changes
         id: rss_changes
