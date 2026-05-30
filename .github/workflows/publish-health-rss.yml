@@ -1,0 +1,48 @@
+name: Publish health RSS
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 14 * * *' # 00:30 Australia/Brisbane
+    - cron: '0 23 * * 6' # Sunday 09:00 Australia/Brisbane
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      HEALTH_EXPORT_DIR: health_exports
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: gpt-4o-mini
+      OPENAI_TIMEOUT_SECONDS: 4
+      REPORT_DAYS: 7
+      RSS_OUTPUT_PATH: public/health-report.xml
+      RSS_FEED_TITLE: Hope Health Report
+      RSS_FEED_LINK: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/health-report.xml
+      RSS_MAX_ITEMS: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Publish daily RSS item
+        if: github.event.schedule != '0 23 * * 6'
+        run: python main.py --rss-only
+      - name: Publish weekly RSS item
+        if: github.event.schedule == '0 23 * * 6'
+        run: python main.py --weekly --rss-only
+      - name: Commit RSS feed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Update health RSS feed
+          file_pattern: public/health-report.xml
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - uses: actions/deploy-pages@v4
