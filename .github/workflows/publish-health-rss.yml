@@ -19,6 +19,8 @@ on:
       - main
     paths:
       - 'health_exports/*.json'
+      - '*.py'
+      - 'requirements.txt'
       - '.github/workflows/publish-health-rss.yml'
 
 permissions:
