@@ -10,7 +10,7 @@ from statistics import mean
 from typing import Any
 
 DATE_RE = re.compile(r"(\d{4}-\d{2}-\d{2})")
-PREFERRED_SOURCE_KEYS = ("xiaomi", "mi fitness", "小米")
+PREFERRED_SOURCE_KEYS = ("xiaomi", "mi fitness", "小米", "с���")
 
 
 def _parse_dt(raw: str) -> datetime | None:
@@ -29,7 +29,10 @@ def _file_date(path: Path) -> date | None:
     m = DATE_RE.search(path.name)
     if not m:
         return None
-    return datetime.strptime(m.group(1), "%Y-%m-%d").date()
+    try:
+        return datetime.strptime(m.group(1), "%Y-%m-%d").date()
+    except ValueError:
+        return None
 
 
 def _to_float(v: Any) -> float | None:
@@ -71,31 +74,29 @@ class HealthDataStore:
         files = [p for p in self.export_dir.iterdir() if p.is_file() and p.suffix.lower() == ".json"]
         if not files:
             raise FileNotFoundError(f"No JSON files in {self.export_dir}")
-        return sorted(files, key=lambda p: p.stat().st_mtime)
 
-    def _parse_one(self, path: Path) -> DayData | None:
+        # GitHub Actions checkout may flatten mtime; prioritize date in filename first.
+        return sorted(
+            files,
+            key=lambda p: (
+                _file_date(p) or date.min,
+                p.stat().st_mtime,
+                p.name,
+            ),
+        )
+
+    def _parse_days_from_file(self, path: Path) -> dict[date, DayData]:
         data = json.loads(path.read_text(encoding="utf-8-sig"))
         metrics = ((data.get("data") or {}).get("metrics") or [])
         if not isinstance(metrics, list):
-            return None
+            return {}
 
-        day = _file_date(path)
-        if day is None:
-            for m in metrics:
-                for point in m.get("data") or []:
-                    dt = _parse_dt(str(point.get("date") or ""))
-                    if dt is not None:
-                        day = dt.date()
-                        break
-                if day is not None:
-                    break
-        if day is None:
-            return None
+        fallback_day = _file_date(path)
 
-        steps_by_source: dict[str, float] = defaultdict(float)
-        distance_by_source: dict[str, float] = defaultdict(float)
-        active_by_source: dict[str, float] = defaultdict(float)
-        sleep_hours = None
+        steps_by_day_source: dict[date, dict[str, float]] = defaultdict(lambda: defaultdict(float))
+        distance_by_day_source: dict[date, dict[str, float]] = defaultdict(lambda: defaultdict(float))
+        active_by_day_source: dict[date, dict[str, float]] = defaultdict(lambda: defaultdict(float))
+        sleep_by_day: dict[date, float] = defaultdict(float)
 
         for metric in metrics:
             name = str(metric.get("name") or "")
@@ -108,46 +109,52 @@ class HealthDataStore:
                 for p in points:
                     qty = _to_float(p.get("qty"))
                     dt = _parse_dt(str(p.get("date") or ""))
-                    if qty is None or dt is None or dt.date() != day:
+                    day = dt.date() if dt is not None else fallback_day
+                    if qty is None or day is None:
                         continue
                     source = str(p.get("source") or p.get("sourceName") or "unknown")
-                    steps_by_source[source] += qty
+                    steps_by_day_source[day][source] += qty
 
             elif name == "walking_running_distance":
                 for p in points:
                     qty = _to_float(p.get("qty"))
                     dt = _parse_dt(str(p.get("date") or ""))
-                    if qty is None or dt is None or dt.date() != day:
+                    day = dt.date() if dt is not None else fallback_day
+                    if qty is None or day is None:
                         continue
                     source = str(p.get("source") or p.get("sourceName") or "unknown")
-                    distance_by_source[source] += qty
+                    distance_by_day_source[day][source] += qty
 
             elif name in {"active_energy", "active_energy_burned"}:
                 for p in points:
                     qty = _to_float(p.get("qty"))
                     dt = _parse_dt(str(p.get("date") or ""))
-                    if qty is None or dt is None or dt.date() != day:
+                    day = dt.date() if dt is not None else fallback_day
+                    if qty is None or day is None:
                         continue
                     source = str(p.get("source") or p.get("sourceName") or "unknown")
-                    active_by_source[source] += _kcal(qty, unit)
+                    active_by_day_source[day][source] += _kcal(qty, unit)
 
             elif name == "sleep_analysis":
-                total = 0.0
                 for p in points:
                     dt = _parse_dt(str(p.get("date") or ""))
-                    if dt is None or dt.date() != day:
+                    day = dt.date() if dt is not None else fallback_day
+                    if day is None:
                         continue
+
+                    sleep_piece = None
                     for key in ("totalSleep", "asleep", "core", "deep", "rem"):
                         q = _to_float(p.get(key))
                         if q is not None and q > 0:
-                            total += q
+                            sleep_piece = q
                             break
-                    else:
+                    if sleep_piece is None:
                         ib = _to_float(p.get("inBed"))
                         if ib is not None and ib > 0:
-                            total += ib
-                if total > 0:
-                    sleep_hours = round(total, 2)
+                            sleep_piece = ib
+
+                    if sleep_piece is not None:
+                        sleep_by_day[day] += sleep_piece
 
         def pick_value(d: dict[str, float]) -> float | None:
             if not d:
@@ -156,35 +163,38 @@ class HealthDataStore:
             chosen = xiaomi if xiaomi else d
             return max(chosen.values())
 
-        steps = pick_value(steps_by_source)
-        distance = pick_value(distance_by_source)
-        active = pick_value(active_by_source)
-
-        return DayData(
-            day=day,
-            steps=int(round(steps)) if steps is not None else None,
-            distance_km=round(distance, 2) if distance is not None else None,
-            active_kcal=round(active, 1) if active is not None else None,
-            sleep_hours=sleep_hours,
-        )
+        all_days = set(steps_by_day_source) | set(distance_by_day_source) | set(active_by_day_source) | set(sleep_by_day)
+        out: dict[date, DayData] = {}
+        for day in all_days:
+            steps = pick_value(steps_by_day_source.get(day, {}))
+            distance = pick_value(distance_by_day_source.get(day, {}))
+            active = pick_value(active_by_day_source.get(day, {}))
+            sleep_total = sleep_by_day.get(day)
+            out[day] = DayData(
+                day=day,
+                steps=int(round(steps)) if steps is not None else None,
+                distance_km=round(distance, 2) if distance is not None else None,
+                active_kcal=round(active, 1) if active is not None else None,
+                sleep_hours=round(sleep_total, 2) if sleep_total and sleep_total > 0 else None,
+            )
+        return out
 
     def load_days(self) -> list[DayData]:
         merged: dict[date, DayData] = {}
         for path in self._json_files():
-            item = self._parse_one(path)
-            if item is None:
-                continue
-            old = merged.get(item.day)
-            if old is None:
-                merged[item.day] = item
-                continue
-            merged[item.day] = DayData(
-                day=item.day,
-                steps=max(x for x in [old.steps, item.steps] if x is not None) if (old.steps is not None or item.steps is not None) else None,
-                distance_km=max(x for x in [old.distance_km, item.distance_km] if x is not None) if (old.distance_km is not None or item.distance_km is not None) else None,
-                active_kcal=max(x for x in [old.active_kcal, item.active_kcal] if x is not None) if (old.active_kcal is not None or item.active_kcal is not None) else None,
-                sleep_hours=max(x for x in [old.sleep_hours, item.sleep_hours] if x is not None) if (old.sleep_hours is not None or item.sleep_hours is not None) else None,
-            )
+            day_map = self._parse_days_from_file(path)
+            for day, item in day_map.items():
+                old = merged.get(day)
+                if old is None:
+                    merged[day] = item
+                    continue
+                merged[day] = DayData(
+                    day=day,
+                    steps=max(x for x in [old.steps, item.steps] if x is not None) if (old.steps is not None or item.steps is not None) else None,
+                    distance_km=max(x for x in [old.distance_km, item.distance_km] if x is not None) if (old.distance_km is not None or item.distance_km is not None) else None,
+                    active_kcal=max(x for x in [old.active_kcal, item.active_kcal] if x is not None) if (old.active_kcal is not None or item.active_kcal is not None) else None,
+                    sleep_hours=max(x for x in [old.sleep_hours, item.sleep_hours] if x is not None) if (old.sleep_hours is not None or item.sleep_hours is not None) else None,
+                )
         return sorted(merged.values(), key=lambda d: d.day)
 
 
