@@ -4,7 +4,7 @@
 
 ## RSS 订阅地址
 
-- https://raw.githubusercontent.com/Hope328/hope-health-rss/main/public/health-report.xml
+- https://github.com/Hope328/hope-health-rss/raw/main/public/health-report.xml
 
 ## 自动触发规则
 
