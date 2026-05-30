@@ -2,15 +2,15 @@
 <rss version="2.0">
   <channel>
     <title>Hope Health Report</title>
-    <link>https://Hope328.github.io/hope-health-rss/health-report.xml</link>
+    <link>https://raw.githubusercontent.com/Hope328/hope-health-rss/main/public/health-report.xml</link>
     <description>Daily and weekly health reports</description>
     <language>zh-CN</language>
-    <lastBuildDate>Sat, 30 May 2026 12:28:02 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 30 May 2026 12:32:18 +0000</lastBuildDate>
     <item>
       <title>Hope Daily Report | 2026-05-25</title>
-      <link>https://Hope328.github.io/hope-health-rss/health-report.xml#daily-2026-05-25</link>
+      <link>https://raw.githubusercontent.com/Hope328/hope-health-rss/main/public/health-report.xml#daily-2026-05-25</link>
       <guid isPermaLink="false">daily-2026-05-25</guid>
-      <pubDate>Sat, 30 May 2026 12:28:02 +0000</pubDate>
+      <pubDate>Sat, 30 May 2026 12:32:18 +0000</pubDate>
       <description>【Hope 减脂日报｜2026-05-25】
 
 一、今日结论
