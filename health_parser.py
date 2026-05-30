@@ -8,8 +8,10 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from statistics import mean
 from typing import Any
+from zoneinfo import ZoneInfo
 
 DATE_RE = re.compile(r"(\d{4}-\d{2}-\d{2})")
+LOCAL_TZ = ZoneInfo("Australia/Brisbane")
 PREFERRED_SOURCE_KEYS = ("xiaomi", "mi fitness", "小米", "с���")
 
 
@@ -19,7 +21,10 @@ def _parse_dt(raw: str) -> datetime | None:
     raw = raw.strip()
     for fmt in ("%Y-%m-%d %H:%M:%S %z", "%Y-%m-%d %H:%M:%S"):
         try:
-            return datetime.strptime(raw, fmt)
+            parsed = datetime.strptime(raw, fmt)
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=LOCAL_TZ)
+            return parsed.astimezone(LOCAL_TZ)
         except ValueError:
             continue
     return None
@@ -75,7 +80,6 @@ class HealthDataStore:
         if not files:
             raise FileNotFoundError(f"No JSON files in {self.export_dir}")
 
-        # GitHub Actions checkout may flatten mtime; prioritize date in filename first.
         return sorted(
             files,
             key=lambda p: (
@@ -205,7 +209,7 @@ def build_summary(export_dir: str, report_days: int) -> dict[str, Any]:
         raise ValueError("No valid health days found")
 
     latest = days[-1]
-    today = datetime.now().date()
+    today = datetime.now(LOCAL_TZ).date()
     if latest.day == today and len(days) > 1:
         target = days[-2]
     else:
