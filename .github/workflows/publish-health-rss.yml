@@ -5,6 +5,12 @@ on:
   schedule:
     - cron: '30 14 * * *' # 00:30 Australia/Brisbane
     - cron: '0 23 * * 6' # Sunday 09:00 Australia/Brisbane
+  push:
+    branches:
+      - main
+    paths:
+      - 'health_exports/*.json'
+      - '.github/workflows/publish-health-rss.yml'
 
 permissions:
   contents: write
