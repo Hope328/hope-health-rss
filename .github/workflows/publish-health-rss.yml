@@ -14,8 +14,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
   publish:
@@ -28,7 +26,7 @@ jobs:
       REPORT_DAYS: 7
       RSS_OUTPUT_PATH: public/health-report.xml
       RSS_FEED_TITLE: Hope Health Report
-      RSS_FEED_LINK: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/health-report.xml
+      RSS_FEED_LINK: https://raw.githubusercontent.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/main/public/health-report.xml
       RSS_MAX_ITEMS: 30
     steps:
       - uses: actions/checkout@v4
@@ -47,8 +45,3 @@ jobs:
         with:
           commit_message: Update health RSS feed
           file_pattern: public/health-report.xml
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
-      - uses: actions/deploy-pages@v4
