@@ -1,5 +1,4 @@
 name: Publish health RSS
-# trigger: parser-fix-refresh
 
 on:
   workflow_dispatch:
@@ -27,7 +26,7 @@ jobs:
       REPORT_DAYS: 7
       RSS_OUTPUT_PATH: public/health-report.xml
       RSS_FEED_TITLE: Hope Health Report
-      RSS_FEED_LINK: https://raw.githubusercontent.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/main/public/health-report.xml
+      RSS_FEED_LINK: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/raw/main/public/health-report.xml
       RSS_MAX_ITEMS: 30
     steps:
       - uses: actions/checkout@v4
