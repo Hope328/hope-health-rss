@@ -1,4 +1,5 @@
 name: Publish health RSS
+# trigger: parser-fix-refresh
 
 on:
   workflow_dispatch:
