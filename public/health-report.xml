@@ -1,11 +1,41 @@
 <?xml version='1.0' encoding='utf-8'?>
 <rss version="2.0">
   <channel>
-    <title>Hope 减脂健康报告</title>
+    <title>Hope Health Report</title>
     <link>https://cdn.jsdelivr.net/gh/Hope328/hope-health-rss@main/public/health-report.xml</link>
-    <description>Hope 的小米手环 / Apple Health 减脂健康报告</description>
+    <description>Daily and weekly health reports</description>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 04 Jun 2026 00:38:57 +1000</lastBuildDate>
+    <lastBuildDate>Wed, 03 Jun 2026 18:35:23 +0000</lastBuildDate>
+    <item>
+      <title>Hope Daily Report | 2026-05-30</title>
+      <link>https://cdn.jsdelivr.net/gh/Hope328/hope-health-rss@main/public/health-report.xml#daily-2026-05-30</link>
+      <guid isPermaLink="false">daily-2026-05-30</guid>
+      <pubDate>Wed, 03 Jun 2026 18:35:23 +0000</pubDate>
+      <description>【Hope 减脂日报｜2026-05-30】
+
+一、今日结论
+今天活动水平：减脂友好。减脂有效性评分 10/10，状态：推进中。
+
+二、核心数据
+- 步数：10189 步
+- 距离：暂无数据
+- 活动能量：381 kcal
+- 睡眠：9.42 小时
+
+三、趋势变化（近7天基准）
+- 平均步数：6906 步
+- 平均距离：暂无数据
+- 平均活动能量：496.4 kcal
+- 平均睡眠：6.83 小时
+
+四、明日行动
+- 最低步数目标：6000 步；理想步数目标：8000 步。
+- 饮食：保留蛋白质和主食，不做补偿式节食。
+- 睡眠：尽量保障 7 小时。
+
+五、一句话提醒
+今天没做到完美也没关系，明天把最低目标守住，趋势就会往目标走。</description>
+    </item>
     <item>
       <title>【Hope 减脂日报｜2026-06-03】</title>
       <link>https://cdn.jsdelivr.net/gh/Hope328/hope-health-rss@main/public/health-report.xml#health-daily-2026-06-03</link>
