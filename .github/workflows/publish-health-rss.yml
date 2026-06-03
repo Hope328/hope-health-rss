@@ -23,6 +23,10 @@ on:
       - 'requirements.txt'
       - '.github/workflows/publish-health-rss.yml'
 
+concurrency:
+  group: health-rss-publish
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -43,6 +47,8 @@ jobs:
       RSS_CDN_PURGE_URL: https://purge.jsdelivr.net/gh/${{ github.repository_owner }}/${{ github.event.repository.name }}@main/public/health-report.xml
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -58,20 +64,18 @@ jobs:
           (github.event_name == 'workflow_dispatch' && inputs.report_type == 'weekly') ||
           (github.event_name == 'schedule' && github.event.schedule == '0 23 * * 6')
         run: python main.py --weekly --rss-only
-      - name: Check RSS changes
-        id: rss_changes
-        run: |
-          if git diff --quiet -- public/health-report.xml; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
       - name: Commit RSS feed
-        if: steps.rss_changes.outputs.changed == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: Update health RSS feed
-          file_pattern: public/health-report.xml
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/health-report.xml
+          if git diff --cached --quiet; then
+            echo "No RSS changes to commit."
+          else
+            git commit -m "Update health RSS feed"
+            git pull --rebase --autostash origin main
+            git push
+          fi
       - name: Purge RSS CDN cache
         if: always()
         run: |
