@@ -37,8 +37,10 @@ jobs:
       REPORT_DAYS: 7
       RSS_OUTPUT_PATH: public/health-report.xml
       RSS_FEED_TITLE: Hope Health Report
-      RSS_FEED_LINK: https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/raw/main/public/health-report.xml
+      RSS_FEED_LINK: https://cdn.jsdelivr.net/gh/${{ github.repository_owner }}/${{ github.event.repository.name }}@main/public/health-report.xml
       RSS_MAX_ITEMS: 30
+      RSS_CDN_URL: https://cdn.jsdelivr.net/gh/${{ github.repository_owner }}/${{ github.event.repository.name }}@main/public/health-report.xml
+      RSS_CDN_PURGE_URL: https://purge.jsdelivr.net/gh/${{ github.repository_owner }}/${{ github.event.repository.name }}@main/public/health-report.xml
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -70,3 +72,8 @@ jobs:
         with:
           commit_message: Update health RSS feed
           file_pattern: public/health-report.xml
+      - name: Purge RSS CDN cache
+        if: always()
+        run: |
+          curl -fsSL "$RSS_CDN_PURGE_URL" || true
+          curl -fsSL "$RSS_CDN_URL" >/dev/null || true
