@@ -5,7 +5,28 @@
     <link>https://cdn.jsdelivr.net/gh/Hope328/hope-health-rss@main/public/health-report.xml</link>
     <description>Daily and weekly health reports</description>
     <language>zh-CN</language>
-    <lastBuildDate>Sat, 06 Jun 2026 15:51:52 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 07 Jun 2026 00:06:44 +0000</lastBuildDate>
+    <item>
+      <title>Hope Weekly Report | 2026-05-24 to 2026-05-30</title>
+      <link>https://cdn.jsdelivr.net/gh/Hope328/hope-health-rss@main/public/health-report.xml#weekly-2026-05-24-2026-05-30</link>
+      <guid isPermaLink="false">weekly-2026-05-24-2026-05-30</guid>
+      <pubDate>Sun, 07 Jun 2026 00:06:44 +0000</pubDate>
+      <description>【Hope 减脂周报｜2026-05-24 ~ 2026-05-30】
+
+一、本周结论
+这周重点看趋势，不看单日波动。
+
+二、核心数据
+- 平均步数：6906 步
+- 平均距离：暂无数据
+- 平均活动能量：496.4 kcal
+- 平均睡眠：6.83 小时
+
+三、下周行动
+- 每天先守住 6000 步，理想 8000 步。
+- 忙时拆成 2 次 15 分钟快走。
+- 少一份零食比突然节食更可持续。</description>
+    </item>
     <item>
       <title>Hope Daily Report | 2026-05-30</title>
       <link>https://cdn.jsdelivr.net/gh/Hope328/hope-health-rss@main/public/health-report.xml#daily-2026-05-30</link>
